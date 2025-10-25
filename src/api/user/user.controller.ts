@@ -1,8 +1,8 @@
-/* import { AuthGuard } from '@/auth/auth.guard';
+import { AuthGuard } from '@/auth/auth.guard';
 import { CursorPaginatedDto } from '@/common/dto/cursor-pagination/paginated.dto';
 import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
 import { Uuid } from '@/common/types/common.type';
-import { CurrentUserSession } from '@/decorators/auth/current-user-session.decorator';
+/* import { CurrentUserSession } from '@/decorators/auth/current-user-session.decorator'; */
 import { ApiAuth } from '@/decorators/http.decorators';
 import {
   Body,
@@ -34,7 +34,7 @@ import { UserService } from './user.service';
 @UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
+/* 
   @ApiAuth({
     summary: 'Get current user',
     type: UserDto,
@@ -42,11 +42,12 @@ export class UserController {
   @Get('whoami')
   async getCurrentUser(
     @CurrentUserSession('user') user: CurrentUserSession['user'],
-  ): Promise<UserDto> {
+  ) : Promise<UserDto>  {
+    return;
     return await this.userService.findOneUser(user.id);
   }
-
-  @Get('/all')
+ */
+ /*  @Get('/all')
   @ApiAuth({
     type: OffsetPaginatedUserDto,
     summary: 'List users.',
@@ -100,6 +101,5 @@ export class UserController {
     return this.userService.updateUserProfile(userSession.user.id, dto, {
       headers: userSession.headers,
     });
-  }
+  } */
 }
- */

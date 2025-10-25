@@ -1,4 +1,4 @@
-/* import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   HealthCheckResult,
   HealthCheckStatus,
@@ -17,4 +17,4 @@ export class HealthCheckDto implements HealthCheckResult {
   @ApiProperty()
   details: HealthIndicatorResult;
 }
- */
+ 

@@ -14,21 +14,34 @@ import helmet from 'helmet';
 import path from 'path';
 import { BULL_BOARD_PATH } from './config/bull/bull.config';
 import { RedisIoAdapter } from './shared/socket/redis.adapter';
+import { SWAGGER_PATH } from './tools/swagger/swagger.setup';
+import { consoleLoggingConfig } from './tools/logger/logger-factory';
+import { Environment } from './constants/app.constant';
 
 async function bootstrap() {
 
+   const envToLogger: Record<`${Environment}`, any> = {
+    local: consoleLoggingConfig(),
+    development: consoleLoggingConfig(),
+    production: true,
+    staging: true,
+    test: false,
+  } as const;
+
    const appConfig = getAppConfig();
 
-  const isWorker = appConfig.isWorker;
+  const isWorker = true;
+
+  console.log('isWorker', isWorker)
 
  /*  const app = await NestFactory.create(AppModule); */
  /*  await app.listen(process.env.PORT ?? 3000);
  */
 
   const app = await NestFactory.create<NestFastifyApplication>(
-    isWorker ? AppModule.worker() : AppModule.main(),
+   /*  isWorker ? */ AppModule.worker()/*  : AppModule.main() */,
     new FastifyAdapter({
-     /*  logger: appConfig.appLogging ? envToLogger[appConfig.nodeEnv] : false, */
+       logger: appConfig.appLogging ? envToLogger[appConfig.nodeEnv] : false, 
       trustProxy: appConfig.isHttps,
     }),
     {
@@ -129,19 +142,19 @@ async function bootstrap() {
     app.useWebSocketAdapter(new RedisIoAdapter(app));
   } */
 
-  /* app
+   app
     .getHttpAdapter()
     .getInstance()
     .addHook('onRequest', async (req, reply) => {
       const pathsToIntercept = [
         `/api${BULL_BOARD_PATH}`, // Bull-Board
-     /*    SWAGGER_PATH, // Swagger Docs 
+         SWAGGER_PATH, // Swagger Docs 
         `/api/auth/reference`, // Better Auth Docs
       ];
-      if (pathsToIntercept.some((path) => req.url.startsWith(path))) {
+    /*   if (pathsToIntercept.some((path) => req.url.startsWith(path))) {
         await basicAuthMiddleware(req, reply);
-      }
-    }); */
+      } */
+    }); 
   await app.listen({
     port: isWorker
       ? configService.getOrThrow('app.workerPort', { infer: true })

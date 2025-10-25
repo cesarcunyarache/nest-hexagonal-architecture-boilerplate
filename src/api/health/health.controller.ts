@@ -1,4 +1,4 @@
-/* import { AuthService } from '@/auth/auth.service';
+import { AuthService } from '@/auth/auth.service';
 import { ErrorDto } from '@/common/dto/error.dto';
 import { GlobalConfig } from '@/config/config.type';
 import { Public } from '@/decorators/public.decorator';
@@ -12,6 +12,7 @@ import {
   HealthCheck,
   HealthCheckResult,
   HealthCheckService,
+  HealthIndicatorResult,
   HttpHealthIndicator,
   MicroserviceHealthIndicator,
   TypeOrmHealthIndicator,
@@ -28,9 +29,9 @@ export class HealthController {
     private readonly db: TypeOrmHealthIndicator,
     private readonly microservice: MicroserviceHealthIndicator,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
-  @Public()
+  /* @Public()
   @ApiOperation({ summary: 'Health check' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -55,6 +56,8 @@ export class HealthController {
     if (
       this.configService.get('app.nodeEnv', { infer: true }) !== 'production'
     ) {
+
+      
       list.push(() => {
         const url = `${this.configService.getOrThrow('app.url', { infer: true })}${SWAGGER_PATH}`;
         return this.http.pingCheck('api-docs', url, {
@@ -63,6 +66,35 @@ export class HealthController {
       });
     }
     return this.health.check(list);
+  } */
+
+  @Public()
+  @ApiOperation({ summary: 'Health check' })
+  @ApiResponse({ status: HttpStatus.OK, type: HealthCheckDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, type: ErrorDto })
+  @Serialize(HealthCheckDto)
+  @Get()
+  @HealthCheck()
+  async check(): Promise<HealthCheckResult> {
+    const list: Array<() => Promise<HealthIndicatorResult>> = [
+      () => this.db.pingCheck('database', { timeout: 5000 }),
+      () =>
+        this.microservice.pingCheck<RedisOptions>('redis', {
+          transport: Transport.REDIS,
+          options: this.configService.getOrThrow('redis'),
+        }),
+    ];
+
+    if (this.configService.get('app.nodeEnv', { infer: true }) !== 'production') {
+      list.push(() => {
+        const url = `${this.configService.getOrThrow('app.url', { infer: true })}${SWAGGER_PATH}`;
+        return this.http.pingCheck('api-docs', url, {
+          headers: this.authService.createBasicAuthHeaders(),
+        });
+      });
+    }
+
+    return this.health.check(list);
   }
+
 }
- */

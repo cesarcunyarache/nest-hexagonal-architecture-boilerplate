@@ -2,9 +2,6 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-
-
-
 import appConfig from '@/config/app/app.config';
 import authConfig from '@/config/auth/auth.config';
 import databaseConfig from '@/config/database/database.config';
@@ -44,9 +41,23 @@ import { default as useGraphqlFactory } from './graphql/graphql.factory';
 import { default as useI18nFactory } from './i18n/i18n.factory';
 import { SocketModule } from './shared/socket/socket.module';
 import { default as useLoggerFactory } from './tools/logger/logger-factory'; */
-import { WorkerModule } from './worker/worker.module'; 
+import { WorkerModule } from './worker/worker.module';
 import { CacheModule as CacheManagerModule } from './shared/cache/cache.module';
 import { MailModule } from './shared/mail/mail.module';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { LoggerModule } from 'nestjs-pino';
+import useLoggerFactory from './tools/logger/logger-factory';
+import { default as throttlerConfig } from '@/config/throttler/throttler.config';
+import { ApiModule } from './api/api.module';
+import { AuthModule } from './auth/auth.module';
+import { SocketModule } from './shared/socket/socket.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+
+import { default as useThrottlerFactory } from '@/config/throttler/throttler.factory';
+import { AppThrottlerGuard } from '@/config/throttler/throttler.guard';
+
+import { BullBoardModule } from '@bull-board/nestjs';
+import { FastifyAdapter } from '@bull-board/fastify';
 
 @Module({
   imports: [],
@@ -64,64 +75,64 @@ export class AppModule {
           load: [
             appConfig,
             databaseConfig,
-             redisConfig, 
+            redisConfig,
             authConfig,
             mailConfig,
-             bullConfig,
-            sentryConfig, 
-           /*  throttlerConfig, */ 
+            bullConfig,
+            sentryConfig,
+            throttlerConfig,
             awsConfig,
             grafanaConfig,
           ],
           envFilePath: ['.env'],
         }),
-      /*   GracefulShutdownModule.forRoot({
-          cleanup: (...args) => {
-            // eslint-disable-next-line no-console
-            console.log('App shutting down...', args);
-          },
-        }), */
-       /*  LoggerModule.forRootAsync({
+        /*   GracefulShutdownModule.forRoot({
+            cleanup: (...args) => {
+              // eslint-disable-next-line no-console
+              console.log('App shutting down...', args);
+            },
+          }), */
+        LoggerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: useLoggerFactory,
-        }), */
+        }),
         TypeOrmModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: databaseConfig,
         }),
-       /*  BullModule.forRootAsync({
+        BullModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: useBullFactory,
-        }), */
-       /*  PrometheusModule.register(), */
-     /*    CacheManagerModule, */
-     /*    MailModule,  */
+        }),
+        PrometheusModule.register(),
+        CacheManagerModule,
+        MailModule,
       ],
-    } ;
-  } 
+    };
+  }
   static main(): DynamicModule {
     return {
       module: AppModule,
       imports: [
         ...(AppModule.common().imports ?? []),
-       /*  I18nModule.forRootAsync({
-          resolvers: [
-            { use: QueryResolver, options: ['lang'] },
-            AcceptLanguageResolver,
-            new HeaderResolver(['x-lang']),
-          ],
-          inject: [ConfigService],
-          useFactory: useI18nFactory,
-        }), */
-       /*  GraphQLModule.forRootAsync<ApolloDriverConfig>({
-          driver: ApolloDriver,
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: useGraphqlFactory,
-        }),
+        /*  I18nModule.forRootAsync({
+           resolvers: [
+             { use: QueryResolver, options: ['lang'] },
+             AcceptLanguageResolver,
+             new HeaderResolver(['x-lang']),
+           ],
+           inject: [ConfigService],
+           useFactory: useI18nFactory,
+         }), */
+        /*  GraphQLModule.forRootAsync<ApolloDriverConfig>({
+           driver: ApolloDriver,
+           imports: [ConfigModule],
+           inject: [ConfigService],
+           useFactory: useGraphqlFactory,
+         }),*/
         ThrottlerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
@@ -133,21 +144,21 @@ export class AppModule {
         }),
         ApiModule,
         AuthModule.forRootAsync(),
-        SocketModule, */
+        SocketModule,
       ],
-     /*  providers: [
+      providers: [
         {
           provide: APP_GUARD,
           useClass: AppThrottlerGuard,
-        },
-      ], */
-    } ;
-  } 
+        }
+      ],
+    };
+  }
 
   static worker(): DynamicModule {
     return {
       module: AppModule,
-      imports: [...(AppModule.common().imports ?? []), /* WorkerModule */],
+      imports: [...(AppModule.common().imports ?? []), WorkerModule],
     };
-}
+  }
 }

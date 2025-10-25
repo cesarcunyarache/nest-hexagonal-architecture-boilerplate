@@ -1,16 +1,16 @@
-/* import { BetterAuthService } from '@/auth/better-auth.service';
+import { BetterAuthService } from '@/auth/better-auth.service';
 import { UserEntity } from '@/auth/entities/user.entity';
 import { CursorPaginationDto } from '@/common/dto/cursor-pagination/cursor-pagination.dto';
 import { CursorPaginatedDto } from '@/common/dto/cursor-pagination/paginated.dto';
 import { OffsetPaginatedDto } from '@/common/dto/offset-pagination/paginated.dto';
 import { Uuid } from '@/common/types/common.type';
-import { CurrentUserSession } from '@/decorators/auth/current-user-session.decorator';
-import { I18nTranslations } from '@/generated/i18n.generated';
+/* import { CurrentUserSession } from '@/decorators/auth/current-user-session.decorator';
+import { I18nTranslations } from '@/generated/i18n.generated'; */
 import { buildPaginator } from '@/utils/pagination/cursor-pagination';
 import { paginate } from '@/utils/pagination/offset-pagination';
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { I18nService } from 'nestjs-i18n';
+/* import { I18nService } from 'nestjs-i18n'; */
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import {
@@ -22,13 +22,13 @@ import {
 @Injectable()
 export class UserService {
   constructor(
-    private readonly i18nService: I18nService<I18nTranslations>,
+   /*  private readonly i18nService: I18nService<I18nTranslations>, */
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly betterAuthService: BetterAuthService,
   ) {}
 
-  async findAllUsers(
+ /*  async findAllUsers(
     dto: QueryUsersOffsetDto,
   ): Promise<OffsetPaginatedDto<UserDto>> {
     const query = this.userRepository
@@ -121,6 +121,5 @@ export class UserService {
       lastName: dto.lastName,
     });
     return await this.findOneUser(userId);
-  }
+  } */
 }
- */
